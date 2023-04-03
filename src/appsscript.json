@@ -1,0 +1,30 @@
+{
+  "timeZone": "America/New_York",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/calendar.addons.execute",
+    "https://www.googleapis.com/auth/calendar.events"
+  ],
+  "addOns": {
+    "common": {
+      "name": "JetlagJelly",
+      "logoUrl": "https://avatars.githubusercontent.com/u/123573463?s=50&v=4",
+      "homepageTrigger": {
+        "runFunction": "onPluginOpen",
+        "enabled": false
+      },
+      "layoutProperties": {
+        "primaryColor": "#a349a4",
+        "secondaryColor": "#00ff40"
+      }
+    },
+    "calendar": {
+      "homepageTrigger": {
+        "runFunction": "onPluginOpen",
+        "enabled": true
+      }
+    }
+  }
+}
