@@ -1,12 +1,16 @@
 {
   "timeZone": "America/New_York",
-  "dependencies": {},
+  "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "Calendar",
+        "version": "v3",
+        "serviceId": "calendar"
+      }
+    ]
+  },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/calendar.addons.execute",
-    "https://www.googleapis.com/auth/calendar.events"
-  ],
   "addOns": {
     "common": {
       "name": "JetlagJelly",
@@ -17,7 +21,7 @@
       },
       "layoutProperties": {
         "primaryColor": "#a349a4",
-        "secondaryColor": "#00ff40"
+        "secondaryColor": "#254E70"
       }
     },
     "calendar": {
