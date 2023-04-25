@@ -73,47 +73,15 @@ function onPluginOpen() {
 }
 
 function sendMeetingRequest(e) {
-  // let data = {
-  //   email: e.formInput.emails.split(" "),
-  //   mtngLength: parseInt(e.formInput.meetinglength),
-  //   startDay: parseInt(e.formInput.starttime.msSinceEpoch),
-  //   endDay: parseInt(e.formInput.endtime.msSinceEpoch)
-  // }
+  let email = e.formInput.emails.split(" "),
+      mtngLength = parseInt(e.formInput.meetinglength),
+      startDay = parseInt(e.formInput.starttime.msSinceEpoch),
+      endDay = parseInt(e.formInput.endtime.msSinceEpoch)
 
-  // var url = "https://csc380.clxxiii.dev/email"
-  // var options = {
-  // 'method' : 'get',
-  // 'email' : data.email,
-  // 'mtngLength' : data.mtngLength,
-  // 'startDay' : data.startDay,
-  // 'endDay': data.endDay
-  // };
-  // var response = UrlFetchApp.fetch(url,options);
-  // console.log(response)
+  var url = `${BASE_URL}/email?email=${email}&mtngLength=${mtngLength}&startDay=${startDay}&endDay=${endDay}`
+  var response = UrlFetchApp.fetch(url,{method: "GET"});
 
-  return debugAction(data)
-}
-
-function addTimerange(e) {
-  let data = {
-    email : e.email,
-    startTime : e.starttime,
-    endTime : e.endTime,
-    days : e.days
-  }
-  var url = `"https://csc380.clxxiii.dev/timerange"`
-  var options = {
-    'method' : 'post',
-    'email' : data.email,
-    'startTime' : data.starttime,
-    'endTime' : data.endTime,
-    'days' : data.days
-  }
-
-  var response = UrlFetchApp.fetch(url,options);
-  console.log(response)
-
-  return debugAction(data)
+  return debugAction(response)
 }
 
 /*
@@ -206,7 +174,12 @@ function changeTimeRangeTime(e) {
   settings[`${prioString}TimeRanges`][index] = range;
   save(settings);
 
-    let nav = CardService.newNavigation()
+  // API CALL TO SAVE SETTINGS
+  let email = Session.getActiveUser().getEmail();
+  var url = `${BASE_URL}/timerange?email=${email}&start=${start}&end=${end}&days=${7}`
+  UrlFetchApp.fetch(url,{ 'method': "PATCH" });
+
+  let nav = CardService.newNavigation()
     .popCard()
     .updateCard(getConfigUICard())
     .pushCard(generateTimeRangeCard({ parameters: {
