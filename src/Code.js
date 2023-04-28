@@ -1,9 +1,9 @@
 /** @typedef {object} Settings
  * @property {number} timezone
- * @property {object[]} priorityTimeRanges
- * @property {number} priorityTimeRanges.start
- * @property {number} priorityTimeRanges.end
- * @property {boolean[]} priorityTimeRanges.weekdays
+ * @property {object[]} preferredTimeRanges
+ * @property {number} preferredTimeRanges.start
+ * @property {number} preferredTimeRanges.end
+ * @property {boolean[]} preferredTimeRanges.weekdays
  * @property {object[]} suboptimalTimeRanges
  * @property {number} suboptimalTimeRanges.start
  * @property {number} suboptimalTimeRanges.end
@@ -17,7 +17,7 @@
 // These are the default settings
 let userSettings = {
   timezone: -5,
-  priorityTimeRanges: [
+  preferredTimeRanges: [
     {
       start: 9,
       end: 17,
@@ -48,12 +48,44 @@ const BASE_URL = "https://csc380.clxxiii.dev";
 const weekMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 function onPluginOpen() {
+  let email = Session.getActiveUser().getEmail();
+
+  let settingsUrl = `${BASE_URL}/currentUser?email=${email}`;
+  let settingsRes;
+  try {
+    settingsRes = UrlFetchApp.fetch(settingsUrl, {method: 'GET'}).getContentText();
+  } catch (e) {
+    return getAuthorizationCard();
+  }
+  let dbSettings = JSON.parse(settingsRes);
+
+  if (dbSettings.status == 404) {
+    return debugAction("No user in db!")
+  }
+  
+  let settings = getSettings()
+  settings.timezone = parseFloat(dbSettings.timezone)
+
+  for (let i = 0; i < dbSettings.start.length; i++) {
+    settings.preferredTimeRanges[i].start = dbSettings.start[i];
+    settings.preferredTimeRanges[i].end = dbSettings.end[i];
+    settings.preferredTimeRanges[i].weekdays = dbSettings.days[i];
+  }
+
+  for (let i = 0; i < dbSettings.substart.length; i++) {
+    settings.suboptimalTimeRanges[i].start = dbSettings.substart[i];
+    settings.suboptimalTimeRanges[i].end = dbSettings.subend[i];
+    settings.suboptimalTimeRanges[i].weekdays = dbSettings.subdays[i];
+  }
+  return debugAction(settings);
+
+
+
   if (!UserProperties.getProperty("configApplied")) {
     UserProperties.setProperty("settings", JSON.stringify(userSettings))
     UserProperties.setProperty("configApplied", "true")
   }
 
-  let settings = getSettings()
   const calendars = Calendar.CalendarList.list().items
   const list = [];
   for (const calendar of calendars) {
@@ -68,7 +100,6 @@ function onPluginOpen() {
   }
   settings.calendars = list;
   save(settings);
-  // return debugAction(settings)
   return getMeetingUICard();
 }
 
@@ -113,7 +144,7 @@ function changeTimezone(e) {
 function createTimeRange(e) {
   let priority = e.parameters.priority == 'true'
   let settings = getSettings();
-  let prioString = priority ? "priority" : "suboptimal"
+  let prioString = priority ? "preferred" : "suboptimal"
   let range = {
       start: 9,
       end: 17,
@@ -140,7 +171,7 @@ function deleteTimeRange(e) {
   let end = e.formInput.end.hours + (e.formInput.end.minutes / 60);
   let index = parseInt(e.parameters.index);
   let settings = getSettings();
-  let prioString = priority ? "priority" : "suboptimal";
+  let prioString = priority ? "preferred" : "suboptimal";
   settings[`${prioString}TimeRanges`].splice(index,1);
   save(settings);
 
@@ -164,7 +195,7 @@ function changeTimeRangeTime(e) {
 
   let priority = e.parameters.priority == 'true';
   let index = parseInt(e.parameters.index);
-  let prioString = priority ? "priority" : "suboptimal";
+  let prioString = priority ? "preferred" : "suboptimal";
 
   let range = settings[`${prioString}TimeRanges`][index]
 
@@ -174,9 +205,11 @@ function changeTimeRangeTime(e) {
   settings[`${prioString}TimeRanges`][index] = range;
   save(settings);
 
+  let weekTemp = range.weekdays.map(x => `days=${x}`);
   // API CALL TO SAVE SETTINGS
   let email = Session.getActiveUser().getEmail();
-  var url = `${BASE_URL}/timerange?email=${email}&start=${start}&end=${end}&days=${7}`
+  var url = `${BASE_URL}/timerange?email=${email}&type=${prioString}&index=${index}&start=${start}&end=${end}&${weekTemp.join("&")}`
+  Logger.log(url)
   UrlFetchApp.fetch(url,{ 'method': "PATCH" });
 
   let nav = CardService.newNavigation()
@@ -201,7 +234,7 @@ function changeTimeRangeWeekday(e) {
 
   let priority = e.parameters.priority == 'true';
   let index = parseInt(e.parameters.index);
-  let prioString = priority ? "priority" : "suboptimal";
+  let prioString = priority ? "preferred" : "suboptimal";
   let weekIndex = weekMap.indexOf(e.parameters.name);
   let range = settings[`${prioString}TimeRanges`][index];
   settings[`${prioString}TimeRanges`][index].weekdays[weekIndex] = !range.weekdays[weekIndex];
@@ -217,6 +250,11 @@ function changeTimeRangeWeekday(e) {
       end: `${range.end}`,
       weekdays: JSON.stringify(range.weekdays)
     }}))
+
+      // API CALL TO SAVE SETTINGS
+  let email = Session.getActiveUser().getEmail();
+  var url = `${BASE_URL}/timerange?email=${email}&start=${range.start}&end=${range.end}&days=${7}`
+  UrlFetchApp.fetch(url,{ 'method': "PATCH" });
 
   return CardService.newActionResponseBuilder()
     .setNavigation(nav)

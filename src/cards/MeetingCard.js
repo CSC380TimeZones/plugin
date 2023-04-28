@@ -47,6 +47,17 @@ const getMeetingUICard = () =>
                     CardService
                       .newAction()
                       .setFunctionName("sendMeetingRequest"))))
+        .setFixedFooter(
+          CardService.newFixedFooter()
+            .setPrimaryButton(
+              CardService.newTextButton()
+                .setText("About")
+                .setOpenLink(
+                  CardService.newOpenLink()
+                    .setUrl("https://csc380.clxxiii.dev")
+                )
+            )
+        )
         .setName("meeting-ui")
         .build()
 

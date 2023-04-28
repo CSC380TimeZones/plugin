@@ -7,7 +7,7 @@ const getConfigUICard = () => {
       CardService.newCardHeader()
       .setTitle("Time Configuration"))
     .addSection(
-      getTimeRangesSection(settings.priorityTimeRanges, true))
+      getTimeRangesSection(settings.preferredTimeRanges, true))
     .addSection(
       CardService.newCardSection()
         .addWidget(
