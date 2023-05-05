@@ -10,6 +10,7 @@ const getAuthorizationCard = () => CardService.newCardBuilder()
       .addWidget(
         CardService.newTextButton()
           .setText("Login")
+          .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
           .setAuthorizationAction(
             CardService.newAuthorizationAction()
               .setAuthorizationUrl(`${BASE_URL}/login`))))

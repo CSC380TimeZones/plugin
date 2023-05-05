@@ -1,5 +1,8 @@
 const getMeetingUICard = () =>
     CardService.newCardBuilder()
+        .setHeader(
+          CardService.newCardHeader()
+            .setImageUrl("https://i.imgur.com/K91rHrd.png")) // Banner URL
         .addSection(
           CardService.newCardSection()
             .addWidget(
@@ -8,28 +11,15 @@ const getMeetingUICard = () =>
                 .setOnClickAction(
                   CardService
                     .newAction()
-                    .setFunctionName("getConfigUICard")))
-            .addWidget(
-              CardService.newDecoratedText()
-                .setText("Hi")
-              
-                .setAuthorizationAction(
-                  CardService.newAuthorizationAction()
-                    .setAuthorizationUrl("https://google.com")
-                )))
+                    .setFunctionName("getConfigUICard"))))
         .addSection(
             CardService.newCardSection()
-                .addWidget(
-                CardService.newTextInput()
-                  .setFieldName("meetinglength")
-                  .setValue("60")
-                  .setTitle("Meeting length in minutes"))
                 .addWidget(
                   CardService
                     .newTextInput()
                     .setFieldName("emails")
                     .setMultiline(true)
-                    .setTitle("Emails"))
+                    .setTitle("Emails (space separated)"))
                 .addWidget(
                   CardService.newDateTimePicker()
                     .setValueInMsSinceEpoch(Date.now())
@@ -40,6 +30,11 @@ const getMeetingUICard = () =>
                     .setValueInMsSinceEpoch(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     .setFieldName("endtime")
                     .setTitle("'Look for' End Time"))
+                .addWidget(
+                CardService.newTextInput()
+                  .setFieldName("meetinglength")
+                  .setValue("60")
+                  .setTitle("Meeting length in minutes"))
                 .addWidget(CardService.newTextButton()
                   .setText("Find a meeting time")
                   .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
